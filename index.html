@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>When Evacuation Is Uneven</title>
+
+  <!-- =====================================================
+    Mapbox GL JS — replaces Leaflet.js
+    We use this to render the NYC map and plot data layers
+  ====================================================== -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+
+  <!-- =====================================================
+    Google Fonts
+    - "Playfair Display" for headlines (editorial feel)
+    - "Source Serif 4" for body text (readable, serious)
+  ====================================================== -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Our main stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+
+  <!-- =====================================================
+    LOADING OVERLAY
+    Shown while the map style tiles load.
+    Hidden via JavaScript once map fires the 'load' event.
+  ====================================================== -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Loading NYC data…</p>
+  </div>
+
+  <!-- =====================================================
+    HERO SECTION
+    Full-screen title card shown at the top of the page.
+  ====================================================== -->
+  <header class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">NYC Public Housing &amp; Hurricane Risk</p>
+      <h1>When Evacuation<br>Is Uneven</h1>
+      <p class="subtitle">
+        Mapping hurricane risk and evacuation access gaps<br>
+        for NYCHA developments in New York City
+      </p>
+      <p class="byline">By Allison Han &nbsp;·&nbsp; April 2026</p>
+      <a class="scroll-cue" href="#intro">Scroll to explore ↓</a>
+    </div>
+  </header>
+
+  <!-- =====================================================
+    INTRO / FRAMING SECTION
+  ====================================================== -->
+  <section class="intro" id="intro">
+    <div class="intro-inner">
+      <blockquote class="pull-quote">
+        "In New York City, hurricane risk is not only about<br>
+        where water reaches. It is also about<br>
+        <em>who can realistically get to safety.</em>"
+      </blockquote>
+      <p>
+        When hurricane risk is mapped in New York City, the focus usually falls on the coastline,
+        flood zones, or evacuation areas. But for residents of public housing, another question
+        matters just as much: when a storm is approaching, <strong>how easy is it to reach a
+        designated evacuation center?</strong>
+      </p>
+      <p>
+        Public housing is not a marginal part of the city's housing landscape. NYCHA, the
+        New York City Housing Authority, operates hundreds of developments spread across all
+        five boroughs, housing hundreds of thousands of residents who may face additional challenges
+        during evacuation: older adults, people with disabilities, and households with fewer
+        transportation options.
+      </p>
+      <p>
+        This project asks a simple but important planning question: <strong>which NYCHA
+        developments face the greatest evacuation disadvantage during hurricanes?</strong>
+        Evacuation disadvantage means a development is located in a higher hurricane risk area
+        <em>and</em> farther from a designated evacuation center.
+      </p>
+    </div>
+  </section>
+
+  <!-- =====================================================
+    SCROLLYTELLING SECTION
+    As the user scrolls through the left-side "steps", the
+    right-side map updates to show different data layers.
+    Controlled by IntersectionObserver in script.js.
+  ====================================================== -->
+  <main class="scroll-container" id="scroll-container">
+
+    <!-- ── STICKY MAP ──────────────────────────────────── -->
+    <div class="map-sticky" id="map-sticky">
+      <div id="map"></div>
+      <!-- Legend panel — content is injected by updateLegend() in script.js -->
+      <div class="map-legend" id="map-legend"></div>
+    </div>
+
+    <!-- ── SCROLLABLE STEPS ────────────────────────────── -->
+    <div class="steps">
+
+      <!-- ── STEP 1 ── NYCHA + Hurricane Risk Geography -->
+      <div class="step" data-step="1">
+        <div class="step-content">
+          <span class="step-label">Step 1 of 4</span>
+          <h2>NYCHA developments are deeply tied to the city's hurricane risk geography</h2>
+          <p>
+            The first step was to place NYCHA developments against New York City's hurricane
+            evacuation zones. This map establishes the broad spatial pattern: NYCHA is not
+            evenly distributed across the city's hazard landscape.
+          </p>
+          <p>
+            A noticeable share of developments are located in coastal or low-lying parts of
+            the city, especially along <strong>southern Brooklyn, parts of Queens, Lower Manhattan,
+            and Staten Island.</strong>
+          </p>
+          <p>
+            This matters because it shows that hurricane preparedness for NYCHA is not a niche
+            problem affecting only a few isolated sites. Public housing is woven into the
+            geography of coastal exposure itself.
+          </p>
+        </div>
+      </div><!-- end step 1 -->
+
+      <!-- ── STEP 2 ── Evacuation Centers + Access Gap -->
+      <div class="step" data-step="2">
+        <div class="step-content">
+          <span class="step-label">Step 2 of 4</span>
+          <h2>Exposure does not automatically mean access</h2>
+          <p>
+            To move from hazard exposure to evacuation planning, I mapped designated hurricane
+            evacuation centers and created a <strong>0.5-mile buffer</strong> around them as
+            a proxy for nearby access. I then identified NYCHA developments located outside
+            that buffer.
+          </p>
+          <p>
+            Some developments may already sit in areas with meaningful hurricane exposure, yet
+            still fall outside a reasonable proximity threshold to an official evacuation center.
+            In those places, <strong>the burden of reaching safety shifts more heavily onto
+            residents themselves.</strong>
+          </p>
+          <p>
+            The pattern here suggests that evacuation infrastructure is not evenly aligned with
+            where vulnerable housing is located.
+          </p>
+          <div class="stat-box" id="stat-box-gap">
+            Loading access gap count…
+          </div>
+        </div>
+      </div><!-- end step 2 -->
+
+      <!-- ── STEP 3 ── Social Vulnerability Overlay -->
+      <div class="step" data-step="3">
+        <div class="step-content">
+          <span class="step-label">Step 3 of 4</span>
+          <h2>The problem becomes sharper when social vulnerability is added</h2>
+          <p>
+            Distance alone does not tell us which access gaps matter most. A development outside
+            the buffer may cause limited inconvenience in one district, but a much more serious
+            burden in another if residents are also more socially vulnerable.
+          </p>
+          <p>
+            The most urgent areas are not simply the farthest places from evacuation centers.
+            They are the places where <strong>spatial access gaps and social vulnerability
+            overlap.</strong> In those districts, evacuation disadvantage is not just about
+            distance, it reflects a broader set of structural pressures that can make
+            emergency response harder, slower, and more unequal.
+          </p>
+          <p>
+            What stands out most is that these overlaps are not randomly scattered. They cluster
+            in specific parts of the city, especially along vulnerable waterfront districts
+            and parts of the Bronx.
+          </p>
+        </div>
+      </div><!-- end step 3 -->
+
+      <!-- ── STEP 4 ── Planning Priority Districts -->
+      <div class="step" data-step="4">
+        <div class="step-content">
+          <span class="step-label">Step 4 of 4</span>
+          <h2>From spatial pattern to planning priority</h2>
+          <p>
+            To make the analysis more actionable, I translated the overlap pattern into a set
+            of top-priority areas. Planning decisions are rarely made at the scale of an abstract
+            citywide surface, they are made through districts, agencies, capital priorities,
+            emergency coordination, and neighborhood-level outreach.
+          </p>
+          <p>
+            The resulting pattern points to a citywide issue with very uneven local expression.
+            Several of the highest-priority areas are concentrated in
+            <strong>southern Brooklyn, southeast Queens, the South Bronx,
+            and Staten Island</strong>, places where planning investment and outreach are
+            most urgently needed.
+          </p>
+          <p>
+            Evacuation inequity is not an isolated exception. It is built into the city's
+            geography in ways that planning needs to confront directly.
+          </p>
+        </div>
+      </div><!-- end step 4 -->
+
+    </div><!-- end .steps -->
+
+  </main><!-- end .scroll-container -->
+
+  <!-- =====================================================
+    METHODS SECTION
+  ====================================================== -->
+  <section class="methods">
+    <div class="methods-inner">
+      <h2>How the analysis was built</h2>
+      <div class="methods-grid">
+        <div class="method-card">
+          <h3>Data Sources</h3>
+          <p>
+            Three public datasets from NYC Open Data: NYCHA Public Housing Developments,
+            Hurricane Evacuation Centers, and Hurricane Inundation by Evacuation Zone.
+          </p>
+        </div>
+        <div class="method-card">
+          <h3>Buffer Analysis</h3>
+          <p>
+            A 0.5-mile buffer was created around each evacuation center using Turf.js.
+            Developments located outside this buffer were flagged as having an access gap.
+          </p>
+        </div>
+        <div class="method-card">
+          <h3>Vulnerability Overlay</h3>
+          <p>
+            A Social Vulnerability Index (SVI) was summarized at the council district
+            level to identify where access gaps overlap with broader social vulnerability.
+          </p>
+        </div>
+        <div class="method-card">
+          <h3>Priority Scoring</h3>
+          <p>
+            Districts were ranked by combining NYCHA count outside buffer, mean hurricane
+            risk zone, and mean SVI score into a composite priority score.
+          </p>
+        </div>
+      </div><!-- end .methods-grid -->
+    </div>
+  </section>
+
+  <!-- =====================================================
+    FOOTER
+  ====================================================== -->
+  <footer>
+    <p>
+      Data: <a href="https://opendata.cityofnewyork.us/" target="_blank">NYC Open Data</a>
+      &nbsp;·&nbsp;
+      Map: <a href="https://docs.mapbox.com/mapbox-gl-js/" target="_blank">Mapbox GL JS</a>
+      &nbsp;·&nbsp;
+      Tiles: <a href="https://www.mapbox.com/" target="_blank">Mapbox</a>
+      &nbsp;·&nbsp;
+      By Allison Han · NYU Web Mapping · 2026
+    </p>
+  </footer>
+
+  <!-- =====================================================
+    Mapbox GL JS — must load BEFORE script.js
+  ====================================================== -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+
+  <!-- Turf.js — geographic analysis library
+       Used to generate accurate 0.5-mile buffer polygons
+       around each evacuation center -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
+  <!-- Our main JavaScript file -->
+  <script src="script.js"></script>
+
+</body>
+</html>
